@@ -2,7 +2,7 @@
 
 English | [中文](README_CN.md)
 
-[![JitPack](https://jitpack.io/v/EyKettle/PrettySquircle.svg)](https://jitpack.io/#EyKettle/PrettySquircle)
+[![JitPack](https://jitpack.io/v/EyKettle/PrettySquircle-Compose.svg)](https://jitpack.io/#EyKettle/PrettySquircle-Compose)
 [![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=21)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Made for Jetpack Compose](https://img.shields.io/badge/Made%20for-Jetpack%20Compose-blue?logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
@@ -30,7 +30,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.EyKettle:PrettySquircle:1.0.0")
+    implementation("com.github.EyKettle:PrettySquircle-Compose:1.0.0")
 }
 ```
 

@@ -44,7 +44,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 groupId = "com.github.EyKettle"
-                artifactId = "PrettySquircle"
+                artifactId = "PrettySquircle-Compose"
                 version = "1.0.0"
 
                 from(components["release"])

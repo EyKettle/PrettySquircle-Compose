@@ -15,6 +15,8 @@ If you're not familiar with what a squircle is, or want to understand the princi
 
 ## Setup
 
+### Basic
+
 **Step 1.** Add the JitPack repository to your root `settings.gradle.kts` file:
 
 ```kotlin
@@ -31,6 +33,30 @@ dependencyResolutionManagement {
 ```kotlin
 dependencies {
     implementation("com.github.EyKettle:PrettySquircle-Compose:1.0.0")
+}
+```
+
+### With Version Catalog
+
+If you are using `libs.versions.toml` to manage your dependencies, you can add it as follows:
+
+**Step 1.** (Same as before) Add the JitPack repository in your root `settings.gradle.kts` file.
+
+**Step 2.** Add the following entries to your `libs.versions.toml` file:
+
+```toml
+[versions]
+prettySquircle = "1.0.0"
+
+[libraries]
+prettySquircle = { group = "com.github.EyKettle", name = "PrettySquircle-Compose", version.ref = "prettySquircle" }
+```
+
+**Step 3.** Add the dependency to your module's `build.gradle.kts` file:
+
+```kotlin
+dependencies {
+    implementation(libs.prettySquircle)
 }
 ```
 

@@ -15,6 +15,8 @@
 
 ## 集成
 
+### 基础方式
+
 **步骤 1.** 在你的根项目 `settings.gradle.kts` 文件中添加 JitPack 仓库：
 
 ```kotlin
@@ -31,6 +33,30 @@ dependencyResolutionManagement {
 ```kotlin
 dependencies {
     implementation("com.github.EyKettle:PrettySquircle-Compose:1.0.0")
+}
+```
+
+### 使用版本目录
+
+如果你正在使用 `libs.versions.toml` 来管理依赖，可以这样添加：
+
+**步骤 1.** (与之前相同) 在 `settings.gradle.kts` 中添加 JitPack 仓库。
+
+**步骤 2.** 在 `libs.versions.toml` 文件中添加以下条目：
+
+```toml
+[versions]
+prettySquircle = "1.0.0"
+
+[libraries]
+prettySquircle = { group = "com.github.EyKettle", name = "PrettySquircle-Compose", version.ref = "prettySquircle" }
+```
+
+**步骤 3.** 在你的模块 `build.gradle.kts` 文件中添加依赖：
+
+```kotlin
+dependencies {
+    implementation(libs.prettySquircle)
 }
 ```
 

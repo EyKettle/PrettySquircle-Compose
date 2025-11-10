@@ -30,7 +30,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.eykettle:prettysquircle:1.0.0")
+    implementation("com.github.EyKettle:PrettySquircle:1.0.0")
 }
 ```
 

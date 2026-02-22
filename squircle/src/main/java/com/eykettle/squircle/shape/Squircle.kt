@@ -1,6 +1,8 @@
 package com.eykettle.squircle.shape
 
 import androidx.collection.LruCache
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
@@ -9,8 +11,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -39,28 +39,49 @@ internal data class AllCornerPathArgs(
 )
 
 /**
+ * Convenience factory for creating a squircle shape using unified radius.
+ */
+fun Squircle(
+    cornerRadius: Dp,
+    cornerSmoothing: CornerSmoothing = CornerSmoothing.Default
+): Squircle = Squircle(
+    topStart = CornerSize(cornerRadius),
+    topEnd = CornerSize(cornerRadius),
+    bottomEnd = CornerSize(cornerRadius),
+    bottomStart = CornerSize(cornerRadius),
+    cornerSmoothing = cornerSmoothing
+)
+
+/**
+ * Convenience factory for creating a squircle shape specifying corners independently.
+ */
+fun Squircle(
+    topStart: Dp = 0.dp,
+    topEnd: Dp = 0.dp,
+    bottomEnd: Dp = 0.dp,
+    bottomStart: Dp = 0.dp,
+    cornerSmoothing: CornerSmoothing = CornerSmoothing.Default
+): Squircle = Squircle(
+    topStart = CornerSize(topStart),
+    topEnd = CornerSize(topEnd),
+    bottomEnd = CornerSize(bottomEnd),
+    bottomStart = CornerSize(bottomStart),
+    cornerSmoothing = cornerSmoothing
+)
+
+/**
  * Create a squircle shape.
  *
  * @param cornerSmoothing A value between 0.0 and 1.0 that controls the smoothness of the transition curve.
  */
 @Immutable
-data class Squircle(
-    internal val topLeftRadius: Dp = 0.dp,
-    internal val topRightRadius: Dp = 0.dp,
-    internal val bottomRightRadius: Dp = 0.dp,
-    internal val bottomLeftRadius: Dp = 0.dp,
-    internal val cornerSmoothing: CornerSmoothing = CornerSmoothing.Default,
-) : Shape {
-    constructor(
-        cornerRadius: Dp,
-        cornerSmoothing: CornerSmoothing = CornerSmoothing.Default,
-    ) : this(
-        topLeftRadius = cornerRadius,
-        topRightRadius = cornerRadius,
-        bottomLeftRadius = cornerRadius,
-        bottomRightRadius = cornerRadius,
-        cornerSmoothing = cornerSmoothing
-    )
+class Squircle(
+    topStart: CornerSize,
+    topEnd: CornerSize,
+    bottomEnd: CornerSize,
+    bottomStart: CornerSize,
+    val cornerSmoothing: CornerSmoothing = CornerSmoothing.Default,
+) : CornerBasedShape(topStart, topEnd, bottomEnd, bottomStart) {
 
     companion object {
         val Default = Squircle(cornerRadius = 8.dp)
@@ -70,10 +91,10 @@ data class Squircle(
 
         internal data class CacheKey(
             val size: Size,
-            val topLeftRadius: Dp,
-            val topRightRadius: Dp,
-            val bottomRightRadius: Dp,
-            val bottomLeftRadius: Dp,
+            val topLeftRadius: Float,
+            val topRightRadius: Float,
+            val bottomRightRadius: Float,
+            val bottomLeftRadius: Float,
             val cornerSmoothing: Float
         )
 
@@ -81,49 +102,92 @@ data class Squircle(
     }
 
     override fun createOutline(
-        size: Size, layoutDirection: LayoutDirection, density: Density
+        size: Size,
+        topStart: Float,
+        topEnd: Float,
+        bottomEnd: Float,
+        bottomStart: Float,
+        layoutDirection: LayoutDirection
     ): Outline {
-        val allRadiusNone = topLeftRadius.value == 0f && topRightRadius.value == 0f
-                && bottomRightRadius.value == 0f && bottomLeftRadius.value == 0f
+        // Handle RTL layouts correctly like standard Compose Shapes
+        val isLtr = layoutDirection == LayoutDirection.Ltr
+        val topLeft = if (isLtr) topStart else topEnd
+        val topRight = if (isLtr) topEnd else topStart
+        val bottomLeft = if (isLtr) bottomStart else bottomEnd
+        val bottomRight = if (isLtr) bottomEnd else bottomStart
+
+        val allRadiusNone = topLeft == 0f && topRight == 0f &&
+                bottomRight == 0f && bottomLeft == 0f
         if (allRadiusNone || size.width == 0f || size.height == 0f)
             return Outline.Rectangle(size.toRect())
 
-        val initialRadius = with(density) {
-            AllCornerRadius(
-                topLeftRadius.toPx(),
-                topRightRadius.toPx(),
-                bottomRightRadius.toPx(),
-                bottomLeftRadius.toPx()
-            )
-        }
+        val initialRadius = AllCornerRadius(topLeft, topRight, bottomRight, bottomLeft)
 
         if (cornerSmoothing == CornerSmoothing.None) {
             return Outline.Rounded(
                 RoundRect(
-                    size.toRect(),
-                    CornerRadius(initialRadius.topLeft),
-                    CornerRadius(initialRadius.topRight),
-                    CornerRadius(initialRadius.bottomRight),
-                    CornerRadius(initialRadius.bottomLeft)
+                    rect = size.toRect(),
+                    topLeft = CornerRadius(initialRadius.topLeft),
+                    topRight = CornerRadius(initialRadius.topRight),
+                    bottomRight = CornerRadius(initialRadius.bottomRight),
+                    bottomLeft = CornerRadius(initialRadius.bottomLeft)
                 )
             )
         }
 
         val key = CacheKey(
             size,
-            topLeftRadius,
-            topRightRadius,
-            bottomRightRadius,
-            bottomLeftRadius,
+            topLeft,
+            topRight,
+            bottomRight,
+            bottomLeft,
             cornerSmoothing.value
         )
         cache[key]?.let { return Outline.Generic(it) }
 
-
         val finalRadius = normalizeRadius(initialRadius, size)
-        val path = createSquirclePath(size, density, finalRadius, cornerSmoothing.value)
+        val path = createSquirclePath(size, finalRadius, cornerSmoothing.value)
             .also { cache.put(key, it) }
         return Outline.Generic(path)
+    }
+
+    override fun copy(
+        topStart: CornerSize,
+        topEnd: CornerSize,
+        bottomEnd: CornerSize,
+        bottomStart: CornerSize
+    ): CornerBasedShape = Squircle(
+        topStart = topStart,
+        topEnd = topEnd,
+        bottomEnd = bottomEnd,
+        bottomStart = bottomStart,
+        cornerSmoothing = cornerSmoothing
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Squircle) return false
+
+        if (topStart != other.topStart) return false
+        if (topEnd != other.topEnd) return false
+        if (bottomEnd != other.bottomEnd) return false
+        if (bottomStart != other.bottomStart) return false
+        if (cornerSmoothing != other.cornerSmoothing) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = topStart.hashCode()
+        result = 31 * result + topEnd.hashCode()
+        result = 31 * result + bottomEnd.hashCode()
+        result = 31 * result + bottomStart.hashCode()
+        result = 31 * result + cornerSmoothing.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "Squircle(topStart = $topStart, topEnd = $topEnd, bottomEnd = $bottomEnd, bottomStart = $bottomStart, cornerSmoothing = $cornerSmoothing)"
     }
 
     private fun normalizeRadius(initial: AllCornerRadius, size: Size): AllCornerRadius {
@@ -180,7 +244,6 @@ data class Squircle(
 
     private fun createSquirclePath(
         size: Size,
-        density: Density,
         radius: AllCornerRadius,
         smoothing: Float
     ): Path {
@@ -375,7 +438,6 @@ data class Squircle(
     private fun adjustTransition(
         delta: Float, horizontal: Boolean, args: CornerPathArgs
     ): CornerPathArgs {
-        // `- LengthB / 1.9` is a very closer shape to semicircle
         val deltaLen = (if (horizontal) {
             args.horizontalLengthA - args.horizontalLengthB / 1.9f
         } else {
@@ -424,6 +486,8 @@ internal data class CornerPathArgs(
     val horizontalLengthB: Float,
     val maxTransitionLength: Float
 )
+
+// Extension functions for drawing the corners
 
 private fun Path.drawTopRightCorner(
     width: Float,

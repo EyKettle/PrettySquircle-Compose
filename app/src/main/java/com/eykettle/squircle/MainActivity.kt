@@ -106,10 +106,10 @@ fun SquirclePreview(
                 .size(width = uiState.width.dp, height = uiState.height.dp)
                 .clip(
                     Squircle(
-                        topLeftRadius = uiState.topLeftRadius.dp,
-                        topRightRadius = uiState.topRightRadius.dp,
-                        bottomRightRadius = uiState.bottomRightRadius.dp,
-                        bottomLeftRadius = uiState.bottomLeftRadius.dp,
+                        topStart = uiState.topLeftRadius.dp,
+                        topEnd = uiState.topRightRadius.dp,
+                        bottomEnd = uiState.bottomRightRadius.dp,
+                        bottomStart = uiState.bottomLeftRadius.dp,
                         cornerSmoothing = CornerSmoothing(uiState.cornerSmoothing)
                     )
                 )

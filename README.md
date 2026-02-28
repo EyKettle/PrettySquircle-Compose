@@ -32,7 +32,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.EyKettle:PrettySquircle-Compose:1.0.0")
+    implementation("com.github.EyKettle:PrettySquircle-Compose:1.1.1")
 }
 ```
 
@@ -46,7 +46,7 @@ If you are using `libs.versions.toml` to manage your dependencies, you can add i
 
 ```toml
 [versions]
-prettySquircle = "1.0.0"
+prettySquircle = "1.1.1"
 
 [libraries]
 prettySquircle = { group = "com.github.EyKettle", name = "PrettySquircle-Compose", version.ref = "prettySquircle" }

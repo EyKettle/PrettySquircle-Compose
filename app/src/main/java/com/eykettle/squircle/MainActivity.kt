@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eykettle.squircle.ui.components.LabeledSlider
-import com.eykettle.squircle.shape.CornerSmoothing
+import com.eykettle.squircle.CornerSmoothing
 import com.eykettle.squircle.shape.Squircle
 import com.eykettle.squircle.ui.SquircleViewModel
 import com.eykettle.squircle.ui.theme.PrettySquircleTheme
